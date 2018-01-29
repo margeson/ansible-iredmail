@@ -1,0 +1,7 @@
+---
+- name: ssh-users | apply root keys
+  authorized_key:
+    user: root
+    state: present
+    exclusive: yes
+    key: "{{ lookup('file', 'authorized_keys') }}"

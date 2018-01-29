@@ -1,0 +1,63 @@
+- name: letsencrypt | install certbot
+  pip:
+    name: certbot-nginx
+    state: latest
+
+- name: letsencrypt | check if a cert exists
+  stat: path="/etc/letsencrypt/live/{{ hostname }}.{{ domainname }}/privkey.pem"
+  register: letsencryptCert
+
+- name: letsencrypt | stop nginx
+  systemd:
+    name: nginx
+    state: stopped
+  when: letsencryptCert.stat.exists == False
+
+- name: letsencrypt | remove self signed cert
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /etc/ssl/private/iRedMail.key
+    - /etc/ssl/certs/iRedMail.crt
+  when: letsencryptCert.stat.exists == False
+  
+- name: letsencrypt | obtain cert
+  shell: "certbot certonly -n --standalone --text -m {{ letsencrypt.email }} --agree-tos -d {{ hostname }}.{{ domainname }}"
+  when: letsencryptCert.stat.exists == False
+
+- name: letsencrypt | set perms on priv key
+  file: 
+    path: "/etc/letsencrypt/archive/{{ hostname }}.{{ domainname }}/privkey1.pem"
+    mode: 0600
+  
+
+- name: letsencrypt | create privkey symlinks
+  file:
+    src: "/etc/letsencrypt/live/{{ hostname }}.{{ domainname }}/privkey.pem"
+    dest: /etc/ssl/private/iRedMail.key
+    state: link
+    
+- name: letsencrypt | create public symlinks
+  file:
+    src: "/etc/letsencrypt/live/{{ hostname }}.{{ domainname }}/fullchain.pem"
+    dest: /etc/ssl/certs/iRedMail.crt
+    state: link
+
+- name: letsencrypt | setup cron for renewal  
+  cron:
+    name: "letsencrypt renew"
+    minute: "{{ letsencrypt.minute }}"
+    hour: "{{ letsencrypt.hour }}"
+    job: certbot renew --http-01-port "{{ letsencrypt.httpPort }}" --tls-sni-01-port "{{ letsencrypt.tlsPort }}" --renew-hook "systemctl reload postfix" --renew-hook "systemctl restart dovecot" --renew-hook "systemctl reload nginx"
+
+- name: letsencrypt | restart stack
+  systemd:
+    state: restarted
+    daemon_reload: yes
+    name: "{{ item }}"
+  with_items:
+    - postfix 
+    - dovecot
+    - nginx
+  when: letsencryptCert.stat.exists == False

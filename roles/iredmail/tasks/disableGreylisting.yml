@@ -1,0 +1,7 @@
+- name: iredmail | Disable GreyListing
+  lineinfile:
+    regexp: '^plugins'
+    path: "/opt/iredapd/settings.py"
+    line: 'plugins = ["reject_null_sender", "wblist_rdns", "reject_sender_login_mismatch", "throttle", "amavisd_wblist", "sql_alias_access_policy"]'
+    backup: yes
+  notify: restart iredapd

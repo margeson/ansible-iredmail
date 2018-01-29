@@ -1,0 +1,52 @@
+- name: imapsync | Install dependencies
+  apt:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - libdigest-hmac-perl
+    - libfile-copy-recursive-perl
+    - libio-socket-inet6-perl
+    - libnet-ssleay-perl
+    - libcrypt-ssleay-perl
+    - libssl-dev
+    - libio-socket-ssl-perl
+    - libio-tee-perl
+    - libnet-imap-perl
+    - makepasswd 
+    - rcs 
+    - perl-doc 
+    - git 
+    - libmail-imapclient-perl 
+    - libdigest-md5-file-perl 
+    - libterm-readkey-perl 
+    - build-essential 
+    - make 
+    - automake 
+    - libunicode-string-perl
+    - libreadonly-perl
+    - libsys-meminfo-perl
+    - libtest-mockobject-perl
+    - libjson-perl
+    - libdata-uniqid-perl
+    - libauthen-ntlm-perl
+
+
+#- name: imapsync | setup CPAN
+#  shell: echo | cpan
+
+#- name: imapsync | install modules from CPAN
+#  shell: cpan JSON::WebToken Test::MockObject
+  
+- name: imapsync | git clone
+  git:
+    repo: https://github.com/imapsync/imapsync.git
+    dest: /root/imapsync
+
+- name: imapsync | create symlink
+  file:
+    src: /root/imapsync/imapsync
+    dest: /bin/imapsync
+    owner: root
+    group: root
+    state: link
+    mode: 0700

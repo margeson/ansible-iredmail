@@ -1,0 +1,27 @@
+---
+- name: Deploy iRedMail - Step 1
+  hosts: iredmail
+  become: true
+  become_user: root
+  gather_facts: false
+  tasks:
+    - name: packages | FIX Ubuntu 16.04 LTS doesn't come with certain modules, required by ansible
+      raw: apt-get install python-minimal aptitude -y
+
+- name: Deploy iRedMail - Step 2
+  hosts: iredmail
+  become: true
+  become_user: root
+  vars_files:
+    - config.yml
+  roles:
+    - packages
+    - hostname
+    - ssh
+    - iredmail
+    - imapsync
+    - backup
+    - letsencrypt
+    - monit  
+
+

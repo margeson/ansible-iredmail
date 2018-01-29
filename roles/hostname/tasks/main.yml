@@ -1,0 +1,18 @@
+---
+- name: Hostname | Update the hostname (pt. 1) - hostname cmd
+  hostname:
+    name: "{{ hostname }}"
+
+- name: Hostname | Update the hostname (pt. 2) - (/etc/hostname)
+  copy:
+    content: "{{ hostname }}{{'\n'}}"
+    dest: /etc/hostname
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Hostname | Update the IPv4 hostname (pt. 3) - (/etc/hosts)
+  template:
+    src: hosts.j2
+    dest: /etc/hosts
+    backup: yes

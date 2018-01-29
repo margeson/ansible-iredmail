@@ -1,0 +1,8 @@
+# {{ ansible_managed }}
+upstream monit {
+    server localhost:2812;
+}
+
+server {
+    include /etc/nginx/sites-conf.d/default-ssl/*.conf;
+}

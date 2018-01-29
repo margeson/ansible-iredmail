@@ -1,0 +1,66 @@
+# {{ ansible_managed }}
+
+#!/bin/bash
+
+# FTP server settings
+USERNAME="{{ backup.username }}"
+PASSWORD="{{ backup.password }}"
+SERVER="{{ backup.server }}"
+PORT="{{ backup.port }}"
+
+# Remote server directory to upload backup
+BACKUPDIR="/"
+
+# The absolute local directory to pickup *.tar.gz file
+# Please do not end the path with a forward slash.
+LOCAL_DIRECTORY="/var/vmail/vmail1"
+
+# The absolute directory path to store temporary files in.
+# This must be granted write access for this script.
+# Please do not end the path with a forward slash.
+TEMP_BACKUP_STORE="/tmp"
+
+# Please note that if you want to support encryption for backups, openssl must be installed.
+# Should backups be encrypted before uploading?
+ENCRYPT_BACKUP={{ backup.encrypt }}
+
+# The absolute file path to the AES password.
+# You can generate a random password using the following command:
+# openssl rand -base64 256 > aes.key
+# The number 256 is the amount of bytes to generate.
+AES_PASSWORD_FILE="{{ backup.Encryptpassword }}"
+
+# END CONFIGURATION
+# Script below, no need to modify it
+
+timestamp=$(date --iso)
+
+backup_remote_file_name="{{ domainname }}-mailboxes-$timestamp.tar.gz"
+backup_file="$TEMP_BACKUP_STORE/$backup_remote_file_name"
+
+echo "Creating backup..."
+tar -czvpf $backup_file $LOCAL_DIRECTORY
+
+if [ "$ENCRYPT_BACKUP" == "true" ]
+then
+      echo "Encrypting backup using OpenSSL..."
+      output_encrypted_file="$backup_file.enc"
+      openssl enc -aes-256-cbc -salt -in $backup_file -out $output_encrypted_file -pass file:$AES_PASSWORD_FILE
+      rm $backup_file
+      backup_file=$output_encrypted_file
+fi
+
+echo "Uploading backup $backup_file ..."
+
+ftp -n -p -i $SERVER $PORT <<EOF
+user $USERNAME $PASSWORD
+cd $BACKUPDIR
+binary
+mdelete *.tar.gz~
+put $backup_file $backup_remote_file_name
+quit
+EOF
+
+echo "Deleting temporary files..."
+rm $backup_file
+echo "Backup complete."

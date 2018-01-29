@@ -1,0 +1,34 @@
+- name: backup | apply backup script
+  template: 
+    src: backup.sh.j2
+    dest: "/bin/ftp-backup-mailconfig.sh"
+    mode: '0744'
+    owner: root
+    group: root
+
+- name: backup | apply backup script 2
+  template: 
+    src: backup-mail.sh.j2
+    dest: "/bin/ftp-backup-mailboxes.sh"
+    mode: '0744'
+    owner: root
+    group: root
+
+- name: backup | apply cron job
+  cron:
+    name: "ftp backup mail config"
+    minute: "{{ backup.minute }}"
+    hour: "{{ backup.hour }}"
+    job: "/bin/bash /bin/ftp-backup-mailconfig.sh"
+
+- name: backup | apply cron job 2
+  cron:
+    name: "ftp backup mailboxes"
+    minute: "{{ backup.minute }}"
+    hour: "{{ backup.hour }}"
+    job: "/bin/bash /bin/ftp-backup-mailboxes.sh"
+
+- name: backup | setup email alerts
+  lineinfile:
+    path: /etc/crontab
+    line: "MAILTO={{ cron.mailto }}"

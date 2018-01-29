@@ -1,0 +1,9 @@
+- name: restart monit
+  systemd: 
+    name: monit 
+    state: restarted
+
+- name: restart nginx
+  systemd: 
+    name: nginx
+    state: restarted

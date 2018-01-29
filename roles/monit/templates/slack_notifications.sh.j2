@@ -1,0 +1,15 @@
+# {{ ansible_managed }}
+#!/bin/sh
+/usr/bin/curl \
+    -X POST \
+    -s \
+    --data-urlencode "payload={ \
+        \"channel\": \"{{ monit.channel }}\", \
+        \"username\": \"{{ monit.botname }}\", \
+        \"color\": \"danger\", \
+        \"icon_emoji\": \":ghost:\", \
+        \"text\": \"$MONIT_SERVICE - $MONIT_DESCRIPTION\" \
+    }" \
+    {{ monit.slackWebhook }}
+
+#\"pretext\": \"{{ hostname }} | $MONIT_DATE\", \

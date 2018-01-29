@@ -1,0 +1,21 @@
+- name: restart stack
+  systemd:
+    name: "{{ item }}"
+    state: restarted
+  with_items:
+    - postfix 
+    - postgresql 
+    - nginx 
+    - php7.0-fpm 
+    - uwsgi 
+    - dovecot 
+    - clamav-daemon 
+    - amavis 
+    - clamav-freshclam 
+    - sogo 
+    - memcached 
+
+- name: restart iredapd
+  systemd:
+    name: iredapd
+    state: restarted

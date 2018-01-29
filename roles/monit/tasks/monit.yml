@@ -1,0 +1,42 @@
+- name: monit | install
+  apt:
+    name: monit
+    state: latest
+
+- name: monit | apply monitrc
+  template:
+    src: monitrc.j2
+    dest: /etc/monit/monitrc
+    mode: 0700
+  notify: restart monit
+
+- name: monit | apply monit configs
+  synchronize:
+    src: roles/monit/templates/conf-enabled/
+    dest: "/etc/monit/conf-enabled/"
+    delete: yes
+    recursive: yes
+  notify: restart monit
+
+- name: monit | copy slack notification script
+  template:
+    src: slack_notifications.sh.j2
+    dest: /etc/monit/slack_notifications.sh
+    mode: 0700
+  notify: restart monit
+
+- name: monit | put monit behind nginx 1
+  template:
+    src: monit.tmpl.j2
+    dest: /etc/nginx/templates/monit.tmpl
+  
+- name: monit | put monit behind nginx 2
+  template:
+    src: 91-monit.conf.j2
+    dest: /etc/nginx/sites-conf.d/default-ssl/91-monit.conf
+
+- name: monit | put monit behind nginx 3
+  template:
+    src: upstream.conf.j2
+    dest: /etc/nginx/sites-available/00-default-ssl.conf
+  notify: restart nginx

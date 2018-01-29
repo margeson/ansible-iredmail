@@ -1,0 +1,3 @@
+- name: monit | determine if monit should be installed
+  include: monit.yml
+  when: monit.install == True

@@ -1,0 +1,59 @@
+---
+hostname: mail
+domainname: example.com
+
+iredmail:
+    # If /etc/iredmail-release exists, iRedMail will not install. This is to prevent the installer running on a system where iRedMail has been installed.
+    version: 0.9.7
+    downloadPath: /root
+    vmailbindpass: password
+    vmailadminpass: password
+    psqlrootpass: password
+    adminpass: password
+    amavisdpass: password
+    admindbpass: password
+    rcmdbpass: password
+    sogodbpass: password
+    sogosievepass: password
+    iredapddbpass: password
+    # Greylisting often causes inbound messages to bounce
+    disableGreylisting: yes
+
+backup: # FTP Backup
+    viaFTP: yes
+    username: user
+    password: "password"
+    server: "1.1.1.1"
+    port: 1002
+    hour: 23
+    minute: 00
+    encrypt: false
+    # Only used when encrypt is false. You must leave the quotes.
+    Encryptpassword: ""
+
+monit:
+    # Requires Slack for alerting
+    install: yes
+    channel: "#devops"
+    botname: "monit-{{ hostname }}.{{ domainname }}"
+    slackWebhook: ""
+    # How often, in seconds, to poll 
+    interval: 60
+    username: admin
+    # use something strong, otherwise the service won't start
+    password: monit
+
+letsencrypt:
+    install: yes
+    email: "postmaster@example.com"
+    # Ports must be open for cert renewal
+    httpPort: 8080
+    tlsPort: 8443
+    hour: 23
+    minute: 30
+
+cron:
+    mailto: "postmaster@{{ domainname }}"
+
+    
+  

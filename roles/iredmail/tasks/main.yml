@@ -1,0 +1,11 @@
+- name: iredmail | register iredmail-release file
+  stat: path=/etc/iredmail-release
+  register: iredmailRelease
+
+- name: iredmail | Install if iredmail-release does not exist
+  include: install.yml
+  when: iredmailRelease.stat.exists == False
+ 
+- name: iredmail | Disable GreyListing
+  include: disableGreylisting.yml
+  when: iredmail.disableGreylisting == True

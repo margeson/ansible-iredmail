@@ -1,0 +1,28 @@
+- name: iredmail | check if software has been downloaded
+  stat: path="{{ iredmail.downloadPath }}/iRedMail-{{ iredmail.version }}"
+  register: iredmailDownloaded
+  
+- name: iredmail | download and extract software
+  unarchive:
+    src: https://bitbucket.org/zhb/iredmail/downloads/iRedMail-{{ iredmail.version }}.tar.bz2
+    dest: "{{ iredmail.downloadPath }}"
+    remote_src: yes
+    owner: root
+    group: root
+  when: iredmailDownloaded.stat.exists == False
+  
+- name: iredmail | copy iredmail install config
+  template:
+    src: config.j2
+    dest: "{{ iredmail.downloadPath }}/iRedMail-{{ iredmail.version }}/config"
+
+- name: iredmail | set perms on install script
+  file:
+    path: "{{ iredmail.downloadPath }}/iRedMail-{{ iredmail.version }}/iRedMail.sh"
+    mode: 0700
+
+- name: iredmail | install
+  shell: "IREDMAIL_DEBUG='NO' AUTO_USE_EXISTING_CONFIG_FILE=y AUTO_INSTALL_WITHOUT_CONFIRM=y AUTO_CLEANUP_REMOVE_SENDMAIL=y AUTO_CLEANUP_REMOVE_MOD_PYTHON=y AUTO_CLEANUP_REPLACE_FIREWALL_RULES=y AUTO_CLEANUP_RESTART_IPTABLES=y AUTO_CLEANUP_REPLACE_MYSQL_CONFIG=y AUTO_CLEANUP_RESTART_POSTFIX=n bash iRedMail.sh"
+  args:
+    chdir: "{{ iredmail.downloadPath }}/iRedMail-{{ iredmail.version }}"
+  notify: restart stack
