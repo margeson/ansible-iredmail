@@ -1,0 +1,31 @@
+---
+galaxy_info:
+  author: Robert Margeson
+  description: Deploy iRedMail using Ansible - LetsEncrypt, Monit, Slack Notifications and FTP Backup
+  company: None
+  license: MIT
+  min_ansible_version: 1.9
+  platforms:
+  - name: Ubuntu
+    versions:
+    - xenial
+  galaxy_tags:
+    - ubuntu
+    - letsencrypt
+    - postgresql
+    - mail
+    - email
+    - postfix
+    - dovecot
+    - iredmail
+    - nginx
+    - amavisd-new
+    - spamassassin
+    - clamav
+    - roundcube
+    - SOGO Groupware
+    - fail2ban
+    - awstats
+    - iredapd
+
+dependencies:
