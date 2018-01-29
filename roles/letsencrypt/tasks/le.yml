@@ -26,12 +26,6 @@
   shell: "certbot certonly -n --standalone --text -m {{ letsencrypt.email }} --agree-tos -d {{ hostname }}.{{ domainname }}"
   when: letsencryptCert.stat.exists == False
 
-- name: letsencrypt | set perms on priv key
-  file: 
-    path: "/etc/letsencrypt/archive/{{ hostname }}.{{ domainname }}/privkey1.pem"
-    mode: 0600
-  
-
 - name: letsencrypt | create privkey symlinks
   file:
     src: "/etc/letsencrypt/live/{{ hostname }}.{{ domainname }}/privkey.pem"
@@ -49,7 +43,7 @@
     name: "letsencrypt renew"
     minute: "{{ letsencrypt.minute }}"
     hour: "{{ letsencrypt.hour }}"
-    job: certbot renew --http-01-port "{{ letsencrypt.httpPort }}" --tls-sni-01-port "{{ letsencrypt.tlsPort }}" --renew-hook "systemctl reload postfix" --renew-hook "systemctl restart dovecot" --renew-hook "systemctl reload nginx"
+    job: '/bin/bash certbot renew --http-01-port "{{ letsencrypt.httpPort }}" --tls-sni-01-port "{{ letsencrypt.tlsPort }}" --renew-hook "systemctl reload postfix" --renew-hook "systemctl restart dovecot" --renew-hook "systemctl reload nginx"'
 
 - name: letsencrypt | restart stack
   systemd:
